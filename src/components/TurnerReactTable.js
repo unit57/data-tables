@@ -78,6 +78,13 @@ export default class TurnerReactTable extends Component {
               columns={columns}
               showPaginationBottom={false}
               defaultFilterMethod={filterCaseInsensitive}
+              SubComponent={(row) => {
+              return (
+                <div>
+                  SUB COMPONENT
+                </div>
+              )
+            }}
             />
       </div>
     )
