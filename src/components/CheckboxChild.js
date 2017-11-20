@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import CheckboxChild from './CheckboxChild.js';
 
 
 
@@ -9,8 +8,7 @@ export default class CheckboxParent extends Component {
 
     return (
       <div>
-        CHECKBOX PARENT
-        <CheckboxChild />
+        CHECKBOX CHILD
       </div>
     )
   }
