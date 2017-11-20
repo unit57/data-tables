@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table'
+import CheckboxParent from './CheckboxParent.js'
 
 
 
@@ -81,7 +82,7 @@ export default class TurnerReactTable extends Component {
               SubComponent={(row) => {
               return (
                 <div>
-                  SUB COMPONENT
+                  <CheckboxParent />
                 </div>
               )
             }}
