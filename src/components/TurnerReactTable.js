@@ -82,7 +82,7 @@ export default class TurnerReactTable extends Component {
               SubComponent={(row) => {
               return (
                 <div>
-                  <CheckboxParent />
+                  <CheckboxParent data={data} />
                 </div>
               )
             }}

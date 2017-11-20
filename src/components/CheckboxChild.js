@@ -8,7 +8,7 @@ export default class CheckboxParent extends Component {
 
     return (
       <div>
-        CHECKBOX CHILD
+        CHECKBOX CHILDddd
       </div>
     )
   }
