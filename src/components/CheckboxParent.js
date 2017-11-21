@@ -2,14 +2,15 @@ import React, { Component } from 'react';
 import shortid from 'shortid';
 import ReactTable from 'react-table';
 
-import CheckboxTableHOC from './CheckboxChild.js';
+import checkboxTableHOC from './checkboxHOC';
 
-//const CheckboxTable = CheckboxTableHOC(ReactTable);
+const CheckboxTable = checkboxTableHOC(ReactTable);
 
-async function getData(data){
-  const result = data
+async function getData()
+{
+  const result = await ( await fetch('/au_500_tree.json') ).json();
   // we are adding a unique ID to the data for tracking the selected records
-  return result.map((item) => {
+  return result.map((item)=>{
     const _id = shortid.generate();
     return {
       _id,
@@ -18,11 +19,12 @@ async function getData(data){
   });
 }
 
-function getColumns(data){
+function getColumns(data)
+{
   const columns = [];
   const sample = data[0];
-  
-  for(let key in sample){
+  for(let key in sample)
+  {
     if(key==='_id') continue;
     columns.push({
       accessor: key,
@@ -32,10 +34,7 @@ function getColumns(data){
   return columns;
 }
 
-
-
-export default class CheckboxParent extends Component {
-
+export class ComponentTest extends React.Component {
   constructor(props) {
     super(props);
     this.state =
@@ -46,14 +45,13 @@ export default class CheckboxParent extends Component {
       selectAll: false,
     };
   }
-
-  componentDidMount(){
-    getData(this.props.data).then((data) => {
+  componentDidMount()
+  {
+    getData().then((data)=>{
       const columns = getColumns(data);
       this.setState({ data, columns });
     });
   }
-  
   toggleSelection = (key,shift,row) => {
     /*
       Implementation of how to manage the selection state is up to the developer.
@@ -79,8 +77,25 @@ export default class CheckboxParent extends Component {
     // update the state
     this.setState({selection});
   }
-
   toggleAll = () => {
+    /*
+      'toggleAll' is a tricky concept with any filterable table
+      do you just select ALL the records that are in your data?
+      OR
+      do you only select ALL the records that are in the current filtered data?
+      
+      The latter makes more sense because 'selection' is a visual thing for the user.
+      This is especially true if you are going to implement a set of external functions
+      that act on the selected information (you would not want to DELETE the wrong thing!).
+      
+      So, to that end, access to the internals of ReactTable are required to get what is
+      currently visible in the table (either on the current page or any other page).
+      
+      The HOC provides a method call 'getWrappedInstance' to get a ref to the wrapped
+      ReactTable and then get the internal state and the 'sortedData'. 
+      That can then be iterrated to get all the currently visible records and set
+      the selection state.
+    */
     const selectAll = this.state.selectAll?false:true;
     const selection = [];
     if(selectAll)
@@ -96,7 +111,6 @@ export default class CheckboxParent extends Component {
     }
     this.setState({selectAll,selection})
   }
-
   isSelected = (key) => {
     /*
       Instead of passing our external selection state we provide an 'isSelected'
@@ -105,30 +119,27 @@ export default class CheckboxParent extends Component {
     */
     return this.state.selection.includes(key);
   }
-
   logSelection = () => {
     console.log('selection:',this.state.selection);
   }
-
- render() {
+  render(){
     const { toggleSelection, toggleAll, isSelected, logSelection } = this;
     const { data, columns, selectAll } = this.state;
-    const extraProps = {
+    const extraProps = 
+    {
       selectAll,
       isSelected,
       toggleAll,
-      toggleSelection
+      toggleSelection,
     }
-
     return (
-        <div style={{ padding: '10px'}}>
-        CHECKBOX PARENT
+      <div style={{ padding: '10px'}}>
         <h1>react-table - Checkbox Table</h1>
         <button onClick={logSelection}>Log Selection to Console</button>
         {` (${this.state.selection.length}) selected`}
         {
           data?
-          <CheckboxTableHOC
+          <CheckboxTable
             data={data}
             columns={columns}
             ref={(r)=>this.checkboxTable = r}
@@ -138,13 +149,9 @@ export default class CheckboxParent extends Component {
           :null
         }
       </div>
-   
-
-    )
+    );
   }
 }
-    
 
-
-
-
+// export default treeTableHOC(ComponentTest);
+export default ComponentTest;

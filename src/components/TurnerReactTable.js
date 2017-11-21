@@ -10,6 +10,7 @@ export default class TurnerReactTable extends Component {
  render() {
 
   let data = this.props.data;
+ 
 
   const filterCaseInsensitive = (filter, row) => {
       const id = filter.pivotId || filter.id;
@@ -21,7 +22,7 @@ export default class TurnerReactTable extends Component {
       );
   };  
 
-  const columns = [{
+  const companyColumns = [{
     expander: true
   }, {
     Header: 'Name',
@@ -51,13 +52,8 @@ export default class TurnerReactTable extends Component {
     filterable: false,
     sortable: false
   }, {
-    id: 'friendName', // Required because our accessor is not a string
-    Header: 'Friend Name',
-    accessor: d => d.friend.name, // Custom value accessors!
-    filterable: false
-  }, {
-    Header: props => <span>Friend Age</span>, // Custom header components!
-    accessor: 'friend.age',
+    Header: 'Published',
+    accessor: 'published', // Custom value accessors!
     Filter: ({ filter, onChange }) =>
       <select
         onChange={event => onChange(event.target.value)}
@@ -65,27 +61,88 @@ export default class TurnerReactTable extends Component {
         value={filter ? filter.value : "all"}
       >
         <option value="all">Show All</option>
-        <option value="21">21</option>
-        <option value="23">23</option>
+        <option value="published">published</option>
+        <option value="unpublished">unpublished</option>
       </select>
   }]
+
+  const brandColumns = [{
+    
+    accessor: 'brandName', // String-based value accessors!
+    Cell: props => <span style={{ paddingLeft: "20px" }} className='number'><input type="checkbox"/> &nbsp; {props.value}</span> ,
+    width: 500,
+    sortable: false
+  }, {
+   
+    accessor: 'type',
+    Cell: props => <span className='number'>{props.value}</span>, // Custom cell components!
+    filterable: false,
+    sortable: false
+  }, {
+    accessor: 'countryName',
+    Cell: props => <span className='number'>{props.value}</span>,
+    sortable: false, // Custom cell components!
+  }, {
+    accessor: 'version',
+    Cell: props => <span className='number'>{props.value}</span>, // Custom cell components!
+    filterable: false,
+    sortable: false
+  }, {
+    accessor: 'category',
+    Cell: props => <span className='number'>{props.value}</span>, // Custom cell components!
+    filterable: false,
+    sortable: false
+  }, {
+    accessor: 'published', // Custom value accessors!
+  }, {
+    expander: true,
+    width: 65,
+    Expander: ({ isExpanded, ...rest }) =>
+      <div>
+        {isExpanded
+          ? <span>&#x2299;</span>
+          : <span>&#x2295;</span>}
+      </div>,
+    style: {
+      cursor: "pointer",
+      fontSize: 25,
+      padding: "0",
+      textAlign: "center",
+      userSelect: "none"
+    }
+  }
+      
+    ]
 
     
     return (
       <div>
            <ReactTable
+              defaultPageSize={10}
               filterable
               data={data}
-              columns={columns}
-              showPaginationBottom={false}
+              columns={companyColumns}
               defaultFilterMethod={filterCaseInsensitive}
-              SubComponent={(row) => {
-              return (
-                <div>
-                  <CheckboxParent data={data} />
-                </div>
-              )
-            }}
+                SubComponent={(row) => {
+                               
+                  return (
+                      <ReactTable
+                          showPaginationBottom={false}
+                          defaultPageSize={row.original.brands.length}
+                          data={row.original.brands}
+                          columns={brandColumns}
+                            SubComponent={(row) => {
+                              console.log('row', row) 
+                              return (
+                                  <div style={{padding: "20px"}}> 
+                                  REPORT
+                                  <br />
+                                  {row.original.brandName}
+                                  </div>
+                                ) }}
+                      /> 
+                  ) 
+                }} 
             />
       </div>
     )
