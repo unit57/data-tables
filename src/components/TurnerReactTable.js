@@ -44,21 +44,53 @@ export default class TurnerReactTable extends Component {
   
   // search by name 
   if (this.state.searchBrand){
-    data = this.props.data.filter((row) => {
-      return row.name.toLowerCase().includes(this.state.searchBrand.toLowerCase())
-    })
+        // get company names that match searchString with name and/or brandNames
+        let filteredCompanyNames = data.filter((company) => {
+          // check if search is in company name
+          let filteredName = company.name.toLowerCase().includes(this.state.searchBrand.toLowerCase());
+          // check if search is in brands of a particular company
+          let filteredBrands = company.brands.filter((brand) => {
+            return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
+          });
+          // if search string is in company name or brand name return true
+          if(filteredName || filteredBrands.length > 0){
+            return true;
+          }   
+        });
+        // take company names that returned true and filter brand names fo those that match searchString
+        let filteredData = filteredCompanyNames.map((company) => {
+         company.brands = company.brands.filter((brand) => {
+            return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase());
+        });
+         return company;
+      });
+      // if there is a search render the search if there is no search string render original data 
+      if (this.state.searchBrand.length >= 1) {
+          data = filteredData;
+      } else if (this.state.searchBrand.length < 1) {
+         data = this.props.data
+      }
+      //console.log('filteredData', filteredData);
   }
   // search by location
   if (this.state.searchLocation){
-    data = this.props.data.filter((row) => {
-      return row.location.toLowerCase().includes(this.state.searchLocation.toLowerCase())
-    })
+    // data = this.props.data.filter((company) => {
+    //   return company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase())
+    // });
+        // get company names whose location or brands locations match searchString
+        let filteredCompanyNames = data.filter((company) => {
+          // check if search is in company name
+          let filteredName = company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+          console.log('filteredName', filteredName)
+        });
   }
   // search by category status
   if (this.state.searchCategory){
     data = this.props.data.filter((row)=>{
       return row.category.includes(this.state.searchCategory) 
     })
+
+
   }
  
 
@@ -178,6 +210,7 @@ export default class TurnerReactTable extends Component {
               defaultPageSize={10}
               data={data}
               columns={companyColumns}
+              // The nested row indexes on the current page that should appear expanded
                 SubComponent={(row) => {
                                
                   return (
