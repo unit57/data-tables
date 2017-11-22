@@ -15,6 +15,7 @@ export default class TurnerReactTable extends Component {
     }
   }
 
+// Search Handelers 
   handleBrandSearch(e){
     this.setState({
       searchLocation: '',
@@ -39,81 +40,82 @@ export default class TurnerReactTable extends Component {
 
 
  render() {
+// Search by Company/Brand names
 
-  let data = [].concat(this.props.data);
-  
-  // search by name 
-  if (this.state.searchBrand.length >= 1){
-        // get company names that match searchString with name and/or brandNames
-        let filteredCompanyNames = data.filter((company) => {
-          // check if search is in company name
-          let filteredName = company.name.toLowerCase().includes(this.state.searchBrand.toLowerCase());
-          // check if search is in brands of a particular company
-          let filteredBrands = company.brands.filter((brand) => {
-            return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
-          });
-          // if search string is in company name or brand name return true
-          if(filteredName || filteredBrands.length > 0){
-            return true;
-          }   
-        });
-        // take company names that returned true and filter brand names fo those that match searchString
-        let filteredData = filteredCompanyNames.map((company) => {
-         company.brands = company.brands.filter((brand) => {
-            return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase());
-        });
-         return company;
-      });
-      // if there is a search render the search if there is no search string render original data 
-      if (this.state.searchBrand.length >= 1) {
-        data = filteredData;
-      } else if (this.state.searchBrand.length < 1) {
-         data = [].concat(this.props.data);
-      };
-      //console.log('filteredData', filteredData);
-  } 
-  if (this.state.searchBrand.length === 0){
-    data = [].concat(this.props.data); 
-  }
-  // search by location
-  if (this.state.searchLocation.length >= 1){
-    // data = this.props.data.filter((company) => {
-    //   return company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase())
-    // });
-        // get company names whose location or brands locations match searchString
-        let filteredCompanyNames = data.filter((company) => {
-          // check if search is in company name | returns true or false
-          let filteredName = company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase());
-          // check is search is in a companies brand location
-          let filteredBrands = company.brands.filter((brand)=>{
-            return brand.countryName.toLowerCase().includes(this.state.searchLocation.toLowerCase());
-          });
-          // console.log('name', company.name, 'includes brands', filteredBrands )
-          // if search string is in company name or in brands, return company name 
-          if (filteredName || filteredBrands.length > 0 ) {
-            return true;
-          }
-        });
-        // console.log('filteredCompanyNames', filteredCompanyNames)
-        // In returned company names filter brands that match search string
-        let filteredData = filteredCompanyNames.map((company) => {
-          
-          company.brands = company.brands.filter((brand)=>{
-            return brand.countryName.toLowerCase().includes(this.state.searchLocation.toLowerCase());
-          });
-          return company;
-        }); 
-          data = filteredData;
-  } else {
-     data = [].concat(this.props.data);
-  }
-  // search by category status
-  if (this.state.searchCategory){
-    data = this.props.data.filter((row)=>{
-      return row.category.includes(this.state.searchCategory) 
-    })
-  }
- 
+let data = [].concat(this.props.data);
+
+if(this.state.searchBrand){
+  // get company names that match searchString with name and/or brandNames
+  data = this.props.data.filter((company) => {
+    // check if search is in company name
+    let companyMatches = company.name.toLowerCase().includes(this.state.searchBrand.toLowerCase());
+    // check if search is in brands of a particular company
+    let filteredBrands = company.brands.filter((brand) => {
+      return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
+    });
+    // if search string is in company name or brand name return true
+    if(companyMatches || filteredBrands.length > 0){
+      return true;
+    }  
+    return false; 
+  }).map((company) => {
+
+    const companyClone = Object.assign({}, company);
+
+    // check if search is in brands of a particular company
+    companyClone.brands = company.brands.filter((brand) => {
+      return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
+    });
+
+    return companyClone;
+  });
+}
+
+// Search by Location
+if(this.state.searchLocation){
+  data = this.props.data.filter((company) => {
+    let companyMatches = company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+    let filteredLocation = company.brands.filter((brand) => {
+      return brand.brandName.toLowerCase().includes(this.state.searchLocation.toLowerCase())
+    });
+    if (companyMatches || filteredLocation.length > 0){
+      return true;
+    }
+    return false;
+  }).map((company)=>{
+    const companyClone = Object.assign({},company);
+
+    companyClone.brands = company.brands.filter((brand)=>{
+      return brand.brandName.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+    });
+    return companyClone;
+  });
+};
+
+// Search by Category
+if(this.state.searchCategory){
+  data = this.props.data.filter((company) => {
+    let companyMatches = company.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
+    let filteredCategory = company.brands.filter((brand) => {
+      return brand.category.toLowerCase().includes(this.state.searchCategory.toLowerCase())
+    });
+    if (companyMatches || filteredCategory.length > 0){
+      return true;
+    }
+    return false;
+  }).map((company)=>{
+    const companyClone = Object.assign({},company);
+
+    companyClone.brands = company.brands.filter((brand)=>{
+      return brand.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
+    });
+    return companyClone;
+  });
+};
+
+
+
+
 
  
 
@@ -207,23 +209,29 @@ export default class TurnerReactTable extends Component {
     return (
       <div>
         <div> 
-             <input value={this.state.searchBrands}
+             <input value={this.state.searchBrand}
                     onChange={(e)=>{this.handleBrandSearch(e)}} 
                     placeholder="Search Brands"
                     style={{height: "30px", width: "200px", fontSize:"1em"}}
                     /> 
-             <input value={this.state.searchLocation}
-                    onChange={(e)=>{this.handleLocationSearch(e)}} 
-                    placeholder="Search Location"
-                    style={{height: "30px", width: "200px", fontSize:"1em"}}
-                    /> 
-              <select
-                    onChange={(e)=>{this.handleCategorySearch(e)}}
-                  >
+             <select 
+                  value={this.state.searchLocation}
+                  onChange={(e)=>{this.handleLocationSearch(e)}}
+                  defaultValue='Search Locations'
+                  style={{height: "30px", width: "200px", fontSize:"1em"}}>
+                    
+                    <option value="">Worldwide</option>
+                    <option value="USA">USA</option>
+                    <option value="France">France</option>
+                    <option value="Japan">Japan</option>    
+             </select> 
+             <select
+                  style={{height: "30px", width: "200px", fontSize:"1em"}}
+                  onChange={(e)=>{this.handleCategorySearch(e)}}>
                     <option value="all">Show All</option>
                     <option value="Company">Company</option>
                     <option value="Brand">Brand</option>
-                  </select>
+              </select>
         </div>
 
 
@@ -231,7 +239,6 @@ export default class TurnerReactTable extends Component {
               defaultPageSize={10}
               data={data}
               columns={companyColumns}
-              // The nested row indexes on the current page that should appear expanded
                 SubComponent={(row) => {
                                
                   return (
