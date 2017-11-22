@@ -43,7 +43,7 @@ export default class TurnerReactTable extends Component {
   let data = [].concat(this.props.data);
   
   // search by name 
-  if (this.state.searchBrand){
+  if (this.state.searchBrand.length >= 1){
         // get company names that match searchString with name and/or brandNames
         let filteredCompanyNames = data.filter((company) => {
           // check if search is in company name
@@ -66,31 +66,52 @@ export default class TurnerReactTable extends Component {
       });
       // if there is a search render the search if there is no search string render original data 
       if (this.state.searchBrand.length >= 1) {
-          data = filteredData;
+        data = filteredData;
       } else if (this.state.searchBrand.length < 1) {
-         data = this.props.data
-      }
+         data = [].concat(this.props.data);
+      };
       //console.log('filteredData', filteredData);
+  } 
+  if (this.state.searchBrand.length === 0){
+    data = [].concat(this.props.data); 
   }
   // search by location
-  if (this.state.searchLocation){
+  if (this.state.searchLocation.length >= 1){
     // data = this.props.data.filter((company) => {
     //   return company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase())
     // });
         // get company names whose location or brands locations match searchString
         let filteredCompanyNames = data.filter((company) => {
-          // check if search is in company name
+          // check if search is in company name | returns true or false
           let filteredName = company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase());
-          console.log('filteredName', filteredName)
+          // check is search is in a companies brand location
+          let filteredBrands = company.brands.filter((brand)=>{
+            return brand.countryName.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+          });
+          // console.log('name', company.name, 'includes brands', filteredBrands )
+          // if search string is in company name or in brands, return company name 
+          if (filteredName || filteredBrands.length > 0 ) {
+            return true;
+          }
         });
+        // console.log('filteredCompanyNames', filteredCompanyNames)
+        // In returned company names filter brands that match search string
+        let filteredData = filteredCompanyNames.map((company) => {
+          
+          company.brands = company.brands.filter((brand)=>{
+            return brand.countryName.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+          });
+          return company;
+        }); 
+          data = filteredData;
+  } else {
+     data = [].concat(this.props.data);
   }
   // search by category status
   if (this.state.searchCategory){
     data = this.props.data.filter((row)=>{
       return row.category.includes(this.state.searchCategory) 
     })
-
-
   }
  
 
