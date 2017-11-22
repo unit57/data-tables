@@ -4,6 +4,7 @@ export default [{
     location: 'Worldwide',
     version: 'International',
     category: 'Company',
+    published: 'Published',
     brands: [
           {
             brandName:'Samsung (Global)',
@@ -31,6 +32,15 @@ export default [{
             category: 'Company',
             published: 'Published',
             version: 'International',
+          },
+                    {
+            brandName:'Samsung Smart TV (Japan)',
+            countryCode: 'JA',
+            countryName: 'Japan',
+            type: 'External',
+            category: 'Company',
+            published: 'Published',
+            version: 'International',
           }
         ]
   },{
@@ -39,6 +49,7 @@ export default [{
     location: 'USA',
     version: 'US Only',
     category: 'Company',
+    published: 'Published',
     brands: [
           {
             brandName:'Turner (Global)',

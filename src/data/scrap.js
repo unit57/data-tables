@@ -1,4 +1,47 @@
-import React, { Component } from 'react';
+              SubComponent={(row) => {
+                
+              return (
+                data.map((company,i)=>{
+                  return company.brands.map((brand, i)=>{
+                    return <div key={i}>{brand.brandName}</div>
+                  })
+                })
+                ) 
+
+            }}
+
+
+            
+            {
+    expander: true
+  }, 
+
+
+
+
+                 row.original.brands.map((brand, i)=>{
+                    return <div key={i}>{brand.brandName}</div>
+                  })
+
+
+           expanded={{ // The nested row indexes on the current page that should appear expanded
+              0: false,
+              1: true,
+
+              }}
+
+                const filterCaseInsensitive = (filter, row) => {
+      const id = filter.pivotId || filter.id;
+      return (
+          row[id] !== undefined ?
+              String(row[id].toLowerCase()).startsWith(filter.value.toLowerCase())
+              :
+              true
+      );
+  }; 
+
+
+  import React, { Component } from 'react';
 import ReactTable from 'react-table'
 import CheckboxParent from './CheckboxParent.js'
 
@@ -40,7 +83,7 @@ export default class TurnerReactTable extends Component {
 
  render() {
 
-  let data = [].concat(this.props.data);
+  let data = [];
   
   // search by name 
   if (this.state.searchBrand){
