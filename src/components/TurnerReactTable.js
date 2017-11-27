@@ -12,6 +12,7 @@ export default class TurnerReactTable extends Component {
       searchBrand: '',
       searchLocation:'',
       searchCategory:'',
+      expanded: {},
       isCheckedBrandName:[]
     }
     this.handleCheckCompany = this.handleCheckCompany.bind(this);
@@ -45,7 +46,6 @@ export default class TurnerReactTable extends Component {
   handleCheckCompany(e){
     // is id set to company name
     let selectedCompany = e.target.id;
-
     
     // find the company that matches the selected company
     let company = this.props.data.find((company) => {
@@ -67,6 +67,7 @@ export default class TurnerReactTable extends Component {
     } else {
       // if checkbox is unchecked remove from isCheckedBrandName all the brands associated with selected company
       let removeBrands = this.state.isCheckedBrandName.filter((brand) => {
+         // why does this work?
          return brandNames.includes(brand) === false;
       });
       this.setState({
@@ -101,6 +102,21 @@ export default class TurnerReactTable extends Component {
           isCheckedBrandName: filterExistingBrandName
         },()=>{console.log('checked Brands', this.state.isCheckedBrandName)});  
     } 
+  }
+
+ handleRowExpanded(newExpanded, index, event) {
+    
+    let expandedTables = Object.assign({}, this.state.expanded);
+    
+    if(expandedTables[index] === false || expandedTables[index] === undefined ){
+      expandedTables[index] = true;
+    } else {
+      expandedTables[index] = false;
+    }
+    this.setState({
+    // we override newExpanded, keeping only current selected row expanded
+        expanded: expandedTables
+    });
   }
 
 
@@ -188,7 +204,8 @@ if(this.state.searchCategory){
   }, {
     Header: 'Name',
     accessor: 'name', // String-based value accessors!
-    Cell: props => <span className='number'> 
+    Cell: props => 
+    <span className='number'> 
       <input 
         type="checkbox" 
         id={props.value} 
@@ -314,6 +331,8 @@ if(this.state.searchCategory){
               data={data}
               columns={companyColumns}
               resizable={false}
+              expanded={this.state.expanded}
+              onExpandedChange={(newExpanded, index, event) => {this.handleRowExpanded(newExpanded, index, event)}}
                 SubComponent={(row) => {
                                
                   return (
@@ -324,7 +343,7 @@ if(this.state.searchCategory){
                           columns={brandColumns}
                           resizable={false}
                             SubComponent={(row) => {
-                              console.log('row', row) 
+                              //console.log('row', row) 
                               return (
                                   <div style={{padding: "20px 20px 20px 50px", border:"solid black 1px",}}> 
                                   Run new affinio report on @{row.original.brandName}                           
