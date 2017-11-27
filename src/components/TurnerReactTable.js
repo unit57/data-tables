@@ -11,8 +11,11 @@ export default class TurnerReactTable extends Component {
     this.state = {
       searchBrand: '',
       searchLocation:'',
-      searchCategory:''
+      searchCategory:'',
+      isCheckedBrandName:[]
     }
+    this.handleCheckCompany = this.handleCheckCompany.bind(this);
+    this.handleCheckBrand = this.handleCheckBrand.bind(this);
   }
 
 // Search Handelers 
@@ -38,6 +41,68 @@ export default class TurnerReactTable extends Component {
     });
   }
 
+//checkboxHandelers
+  handleCheckCompany(e){
+    // is id set to company name
+    let selectedCompany = e.target.id;
+
+    
+    // find the company that matches the selected company
+    let company = this.props.data.find((company) => {
+        return company.name === selectedCompany;
+    });
+    // get all brand names from  selected company
+    let brandNames = company.brands.map((brand) => {
+          return brand.brandName  
+    });
+    // if checkbox is checked add brandNames to existing state of isCheckedBrandName
+    if (e.target.checked){ 
+      // make new array from existing state and new brand names
+      let newBrandArray = [...this.state.isCheckedBrandName, ...brandNames];
+
+      this.setState({
+        // set new state to existing state plus new brands with no duplicates
+        isCheckedBrandName: Array.from(new Set(newBrandArray))
+      }, ()=>{console.log('state selected names',this.state.isCheckedBrandName)})
+    } else {
+      // if checkbox is unchecked remove from isCheckedBrandName all the brands associated with selected company
+      let removeBrands = this.state.isCheckedBrandName.filter((brand) => {
+         return brandNames.includes(brand) === false;
+      });
+      this.setState({
+        isCheckedBrandName: removeBrands,
+      },()=>{console.log('state selected names removed company',this.state.isCheckedBrandName)});
+    }
+
+  };
+
+
+
+  handleCheckBrand(e) {
+    // id is set to brand name
+    let brand = e.target.id;
+    this.filterBrands(brand);
+  }
+
+
+  filterBrands(brandName){
+    // if the checked brand state does not include the selected brand, add it.
+    if(this.state.isCheckedBrandName.includes(brandName) === false){
+        this.setState({
+          isCheckedBrandName: [...this.state.isCheckedBrandName, brandName]
+        },()=>{console.log('checked Brands',this.state.isCheckedBrandName)});
+        
+    } else {
+      // if the checked brand state does not include the selected brand, remove it.
+      let filterExistingBrandName = this.state.isCheckedBrandName.filter((b)=>{
+        return b !== brandName;
+      })
+        this.setState({
+          isCheckedBrandName: filterExistingBrandName
+        },()=>{console.log('checked Brands', this.state.isCheckedBrandName)});  
+    } 
+  }
+
 
  render() {
 // Search by Company/Brand names
@@ -61,12 +126,10 @@ if(this.state.searchBrand){
   }).map((company) => {
 
     const companyClone = Object.assign({}, company);
-
     // check if search is in brands of a particular company
     companyClone.brands = company.brands.filter((brand) => {
       return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
     });
-
     return companyClone;
   });
 }
@@ -92,7 +155,7 @@ if(this.state.searchLocation){
   });
 };
 
-// Search by Category
+// Search by Category ***** FIND OUT WHAT WE ARE REALLY FILTERING HERE ********
 if(this.state.searchCategory){
   data = this.props.data.filter((company) => {
     let companyMatches = company.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
@@ -118,14 +181,20 @@ if(this.state.searchCategory){
 
 
  
-
+// Company Columns
   const companyColumns = [{
     expander: true,
     width: 50
   }, {
     Header: 'Name',
     accessor: 'name', // String-based value accessors!
-    Cell: props => <span className='number'> <input type="checkbox"/> {props.value}</span> ,
+    Cell: props => <span className='number'> 
+      <input 
+        type="checkbox" 
+        id={props.value} 
+        value={props.value}
+        onChange={(e)=>{this.handleCheckCompany(e)}}/>
+        <label htmlFor={props.value}> {props.value} </label></span>,
     width: 500,
   }, {
     Header: 'Type',
@@ -157,12 +226,18 @@ if(this.state.searchCategory){
     filterable: false,
     sortable: false
   }]
-
+// Brand Columns
   const brandColumns = [{
     width: 50
   }, {
     accessor: 'brandName', // String-based value accessors!
-    Cell: props => <span style={{ paddingLeft: "20px" }} className='number'><input type="checkbox"/> &nbsp; {props.value}</span> ,
+    Cell: props => <span style={{ paddingLeft: "20px" }} className='number'>
+      <input 
+        type="checkbox" 
+        id={props.value} 
+        value={props.value}
+        onChange={(e)=>{this.handleCheckBrand(e)}}/>
+      <label htmlFor={props.value}> {props.value} </label></span>,
     width: 500,
     sortable: false
   }, {
@@ -217,7 +292,6 @@ if(this.state.searchCategory){
              <select 
                   value={this.state.searchLocation}
                   onChange={(e)=>{this.handleLocationSearch(e)}}
-                  defaultValue='Search Locations'
                   style={{height: "30px", width: "200px", fontSize:"1em"}}>
                     
                     <option value="">Worldwide</option>
@@ -228,7 +302,7 @@ if(this.state.searchCategory){
              <select
                   style={{height: "30px", width: "200px", fontSize:"1em"}}
                   onChange={(e)=>{this.handleCategorySearch(e)}}>
-                    <option value="all">Show All</option>
+                    <option value="all">All Categories</option>
                     <option value="Company">Company</option>
                     <option value="Brand">Brand</option>
               </select>
@@ -239,6 +313,7 @@ if(this.state.searchCategory){
               defaultPageSize={10}
               data={data}
               columns={companyColumns}
+              resizable={false}
                 SubComponent={(row) => {
                                
                   return (
@@ -247,6 +322,7 @@ if(this.state.searchCategory){
                           defaultPageSize={row.original.brands.length}
                           data={row.original.brands}
                           columns={brandColumns}
+                          resizable={false}
                             SubComponent={(row) => {
                               console.log('row', row) 
                               return (
