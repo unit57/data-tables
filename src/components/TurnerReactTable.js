@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import ReactTable from 'react-table'
 import CheckboxParent from './CheckboxParent.js'
 
-
-
+let expandedGroups = {};
+console.log('expanded groups', expandedGroups)
 
 export default class TurnerReactTable extends Component {
   constructor(props){
@@ -21,10 +21,12 @@ export default class TurnerReactTable extends Component {
 
 // Search Handelers 
   handleBrandSearch(e){
+
     this.setState({
       searchLocation: '',
       searchBrand: e.target.value,
-      searchCategory: ''
+      searchCategory: '',
+      expanded: expandedGroups
     });
   }
   handleLocationSearch(e){
@@ -43,11 +45,13 @@ export default class TurnerReactTable extends Component {
   }
 
 //checkboxHandelers
+
   
-  // Select All
+// Select All
 handleCheckCompany(e){
   // is id set to company name
-  let selectedCompany = e.target.id;
+  let selectedCompany = e.target.id
+
 
   // find the company that matches the selected company
   let company = this.props.data.find((company) => {
@@ -98,10 +102,7 @@ handleCheckBrand(e) {
     },()=>{console.log('checked Brands', this.state.isCheckedBrandName)});  
   }
 }
-//
-isCheckBoxChecked(props){
-  return true;
-}
+
 
 
   // filterBrands(brandName){
@@ -122,6 +123,17 @@ isCheckBoxChecked(props){
   //   } 
   // }
 
+areBrandsChecked(props){
+  //console.log('props', props)
+  
+  let brandNames = props.original.brands.map((brand) => {return brand.brandName;})
+
+  let allBrandsSelected = this.state.isCheckedBrandName.includes(brandNames);
+
+  //console.log('allBrandsSelected', allBrandsSelected)
+
+}
+// fires when expaner arrow is clicked
 handleRowExpanded(newExpanded, index, event) {
   // make a new object of existing values of expanded state
   let expandedTables = Object.assign({}, this.state.expanded);
@@ -137,84 +149,100 @@ handleRowExpanded(newExpanded, index, event) {
   });
 }
 
+// fires on search 
+expandOnSearch(index){
+ console.log('open index from search', index)
 
- render() {
-// Search by Company/Brand names
-
-let data = [].concat(this.props.data);
-
-if(this.state.searchBrand){
-  // get company names that match searchString with name and/or brandNames
-  data = this.props.data.filter((company) => {
-    // check if search is in company name
-    let companyMatches = company.name.toLowerCase().includes(this.state.searchBrand.toLowerCase());
-    // check if search is in brands of a particular company
-    let filteredBrands = company.brands.filter((brand) => {
-      return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
-    });
-    // if search string is in company name or brand name return true
-    if(companyMatches || filteredBrands.length > 0){
-      return true;
-    }  
-    return false; 
-  }).map((company) => {
-
-    const companyClone = Object.assign({}, company);
-    // check if search is in brands of a particular company
-    companyClone.brands = company.brands.filter((brand) => {
-      return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
-    });
-    return companyClone;
-  });
 }
 
-// Search by Location
-if(this.state.searchLocation){
-  data = this.props.data.filter((company) => {
-    let companyMatches = company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase());
-    let filteredLocation = company.brands.filter((brand) => {
-      return brand.brandName.toLowerCase().includes(this.state.searchLocation.toLowerCase())
+
+
+render() {
+
+
+  let data = [].concat(this.props.data);
+  //let expandedGroups = this.state.expanded;
+
+  // Search by Company/Brand names
+  if(this.state.searchBrand){
+    // get company names that match searchString with name and/or brandNames
+   
+    data = this.props.data.filter((company, index) => {
+      // check if search is in company name
+      let companyMatches = company.name.toLowerCase().includes(this.state.searchBrand.toLowerCase());
+      // check if search is in brands of a particular company
+      let filteredBrands = company.brands.filter((brand) => {
+        return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
+      });
+      // if search string is in company name or brand name return true
+      if(companyMatches || filteredBrands.length > 0){
+        
+        return true;
+      }  
+      return false; 
+    }).map((company, index) => {
+
+      const companyClone = Object.assign({}, company);
+      // check if search is in brands of a particular company
+      companyClone.brands = company.brands.filter((brand) => {
+        return brand.brandName.toLowerCase().includes(this.state.searchBrand.toLowerCase())
+      });
+      return companyClone;
+
     });
-    if (companyMatches || filteredLocation.length > 0){
-      return true;
-    }
-    return false;
-  }).map((company)=>{
-    const companyClone = Object.assign({},company);
+    expandedGroups = data.map((element, index)=>{
+      return expandedGroups[index] = true;
+    }); 
+  } else if (this.state.searchBrand === ''){
+      expandedGroups = data.map((element, index)=>{
+        return expandedGroups[index] = false;
+      });
+  }
+   
+  // Search by Location
+  if(this.state.searchLocation){
+    data = this.props.data.filter((company) => {
+      let companyMatches = company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+      let filteredLocation = company.brands.filter((brand) => {
+        return brand.brandName.toLowerCase().includes(this.state.searchLocation.toLowerCase())
+      });
+      if (companyMatches || filteredLocation.length > 0){
+        return true;
+      }
+      return false;
+    }).map((company)=>{
+      const companyClone = Object.assign({},company);
 
-    companyClone.brands = company.brands.filter((brand)=>{
-      return brand.brandName.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+      companyClone.brands = company.brands.filter((brand)=>{
+        return brand.brandName.toLowerCase().includes(this.state.searchLocation.toLowerCase());
+      });
+      return companyClone;
     });
-    return companyClone;
-  });
-};
+  };
 
-// Search by Category ***** FIND OUT WHAT WE ARE REALLY FILTERING HERE ********
-if(this.state.searchCategory){
-  data = this.props.data.filter((company) => {
-    let companyMatches = company.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
-    let filteredCategory = company.brands.filter((brand) => {
-      return brand.category.toLowerCase().includes(this.state.searchCategory.toLowerCase())
+  // Search by Category ***** FIND OUT WHAT WE ARE REALLY FILTERING HERE ********
+  if(this.state.searchCategory){
+    data = this.props.data.filter((company) => {
+      let companyMatches = company.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
+      let filteredCategory = company.brands.filter((brand) => {
+        return brand.category.toLowerCase().includes(this.state.searchCategory.toLowerCase())
+      });
+      if (companyMatches || filteredCategory.length > 0){
+        return true;
+      }
+      return false;
+    }).map((company)=>{
+      const companyClone = Object.assign({},company);
+
+      companyClone.brands = company.brands.filter((brand)=>{
+        return brand.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
+      });
+      return companyClone;
     });
-    if (companyMatches || filteredCategory.length > 0){
-      return true;
-    }
-    return false;
-  }).map((company)=>{
-    const companyClone = Object.assign({},company);
-
-    companyClone.brands = company.brands.filter((brand)=>{
-      return brand.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
-    });
-    return companyClone;
-  });
-};
+  };
 
 
-
-
-
- 
+   
 // Company Columns
   const companyColumns = [{
     expander: true,
@@ -223,17 +251,17 @@ if(this.state.searchCategory){
     Header: 'Name',
     accessor: 'name', // String-based value accessors!
     Cell: (props) => {
-      props.checked = false
-      //console.log('props', props)
+      let index = props.index;
+      let checked = this.areBrandsChecked(props);
     return(
-    <span className='number'> 
-      <input 
+      <span className='number'> 
+        <input 
         type="checkbox" 
         id={props.value} 
         value={props.value}
-        
-        onChange={(e, props)=>{this.handleCheckCompany(e, props)}}/>
-        <label htmlFor={props.value}> {props.value} </label></span>
+        onChange={(e)=>{this.handleCheckCompany(e)}}/>
+        <label htmlFor={props.value}> {props.value} </label>
+      </span>
       )},
 
     width: 500,
@@ -333,7 +361,6 @@ if(this.state.searchCategory){
       userSelect: "none"
     }
   }]
-
     
     return (
       <div>
