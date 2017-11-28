@@ -3,7 +3,7 @@ import ReactTable from 'react-table'
 import CheckboxParent from './CheckboxParent.js'
 
 let expandedGroups = {};
-console.log('expanded groups', expandedGroups)
+
 
 export default class TurnerReactTable extends Component {
   constructor(props){
@@ -19,9 +19,10 @@ export default class TurnerReactTable extends Component {
     this.handleCheckBrand = this.handleCheckBrand.bind(this);
   }
 
+
+
 // Search Handelers 
   handleBrandSearch(e){
-
     this.setState({
       searchLocation: '',
       searchBrand: e.target.value,
@@ -33,8 +34,9 @@ export default class TurnerReactTable extends Component {
     this.setState({
       searchLocation: e.target.value,
       searchBrand: '',
-      searchCategory: ''
-    });
+      searchCategory: '',
+      expanded: expandedGroups
+    }, ()=>{console.log('this.state.searchLocation', this.state.searchLocation, expandedGroups)});
   }
   handleCategorySearch(e){
     this.setState({
@@ -123,15 +125,12 @@ handleCheckBrand(e) {
   //   } 
   // }
 
+// When all brands are selected check company, when company is selected but a brand is delecected, deselect company
 areBrandsChecked(props){
-  //console.log('props', props)
-  
   let brandNames = props.original.brands.map((brand) => {return brand.brandName;})
-
-  let allBrandsSelected = this.state.isCheckedBrandName.includes(brandNames);
-
-  //console.log('allBrandsSelected', allBrandsSelected)
-
+   return brandNames.every((element)=>{
+     return this.state.isCheckedBrandName.includes(element)
+   });
 }
 // fires when expaner arrow is clicked
 handleRowExpanded(newExpanded, index, event) {
@@ -149,17 +148,10 @@ handleRowExpanded(newExpanded, index, event) {
   });
 }
 
-// fires on search 
-expandOnSearch(index){
- console.log('open index from search', index)
-
-}
 
 
 
 render() {
-
-
   let data = [].concat(this.props.data);
   //let expandedGroups = this.state.expanded;
 
@@ -193,7 +185,7 @@ render() {
     expandedGroups = data.map((element, index)=>{
       return expandedGroups[index] = true;
     }); 
-  } else if (this.state.searchBrand === ''){
+  } else if (this.state.searchBrand === '' && this.state.searchLocation === ''){
       expandedGroups = data.map((element, index)=>{
         return expandedGroups[index] = false;
       });
@@ -218,6 +210,10 @@ render() {
       });
       return companyClone;
     });
+    
+    expandedGroups = data.map((element, index)=>{
+      return expandedGroups[index] = true;
+    }); 
   };
 
   // Search by Category ***** FIND OUT WHAT WE ARE REALLY FILTERING HERE ********
@@ -233,7 +229,6 @@ render() {
       return false;
     }).map((company)=>{
       const companyClone = Object.assign({},company);
-
       companyClone.brands = company.brands.filter((brand)=>{
         return brand.category.toLowerCase().includes(this.state.searchCategory.toLowerCase());
       });
@@ -259,6 +254,7 @@ render() {
         type="checkbox" 
         id={props.value} 
         value={props.value}
+        checked={checked}
         onChange={(e)=>{this.handleCheckCompany(e)}}/>
         <label htmlFor={props.value}> {props.value} </label>
       </span>
@@ -295,6 +291,7 @@ render() {
     filterable: false,
     sortable: false
   }]
+
 // Brand Columns
   const brandColumns = [{
     width: 50
@@ -309,7 +306,6 @@ render() {
       } else {
         checked = false
       };
-
       return (
         <span style={{ paddingLeft: "20px" }} className='number'>
         <input 
@@ -362,61 +358,56 @@ render() {
     }
   }]
     
-    return (
-      <div>
-        <div> 
-             <input value={this.state.searchBrand}
-                    onChange={(e)=>{this.handleBrandSearch(e)}} 
-                    placeholder="Search Brands"
-                    style={{height: "30px", width: "200px", fontSize:"1em"}}
-                    /> 
-             <select 
-                  value={this.state.searchLocation}
-                  onChange={(e)=>{this.handleLocationSearch(e)}}
-                  style={{height: "30px", width: "200px", fontSize:"1em"}}>
-                    
-                    <option value="">Worldwide</option>
-                    <option value="USA">USA</option>
-                    <option value="France">France</option>
-                    <option value="Japan">Japan</option>    
-             </select> 
-             <select
-                  style={{height: "30px", width: "200px", fontSize:"1em"}}
-                  onChange={(e)=>{this.handleCategorySearch(e)}}>
-                    <option value="all">All Categories</option>
-                    <option value="Company">Company</option>
-                    <option value="Brand">Brand</option>
-              </select>
-        </div>
+  return (
+    <div>
+      <div> 
+       <input 
+        value={this.state.searchBrand}
+        onChange={(e)=>{this.handleBrandSearch(e)}} 
+        placeholder="Search Brands"
+        style={{height: "30px", width: "200px", fontSize:"1em"}}
+        /> 
+       <select 
+        value={this.state.searchLocation}
+        onChange={(e)=>{this.handleLocationSearch(e)}}
+        style={{height: "30px", width: "200px", fontSize:"1em"}}>                   
+          <option value="">Worldwide</option>
+          <option value="USA">USA</option>
+          <option value="France">France</option>
+          <option value="Japan">Japan</option>    
+       </select> 
+       <select
+        style={{height: "30px", width: "200px", fontSize:"1em"}}
+        onChange={(e)=>{this.handleCategorySearch(e)}}>
+          <option value="all">All Categories</option>
+          <option value="Company">Company</option>
+          <option value="Brand">Brand</option>
+        </select>
+      </div>
+       <ReactTable
+          defaultPageSize={10}
+          data={data}
+          columns={companyColumns}
+          resizable={false}
+          expanded={this.state.expanded}
+          onExpandedChange={(newExpanded, index, event) => {this.handleRowExpanded(newExpanded, index, event)}}
+            SubComponent={(row) => {
+              return (
 
-
-           <ReactTable
-              defaultPageSize={10}
-              data={data}
-              columns={companyColumns}
-              resizable={false}
-              expanded={this.state.expanded}
-              onExpandedChange={(newExpanded, index, event) => {this.handleRowExpanded(newExpanded, index, event)}}
-                SubComponent={(row) => {
-                               
-                  return (
-                      <ReactTable
-                          showPaginationBottom={false}
-                          defaultPageSize={row.original.brands.length}
-                          data={row.original.brands}
-                          columns={brandColumns}
-                          resizable={false}
-                            SubComponent={(row) => {
-                              //console.log('row', row) 
-                              return (
-                                  <div style={{padding: "20px 20px 20px 50px", border:"solid black 1px",}}> 
-                                  Run new affinio report on @{row.original.brandName}                           
-                                  </div>
-                                ) }}
-                      /> 
-                  ) 
-                }} 
-            />
+              <ReactTable
+                showPaginationBottom={false}
+                defaultPageSize={row.original.brands.length}
+                data={row.original.brands}
+                columns={brandColumns}
+                resizale={false}
+                  SubComponent={(row) => {
+                    //console.log('row', row) 
+                    return (
+                      <div style={{padding: "20px 20px 20px 50px", border:"solid black 1px",}}> 
+                      Run new affinio report on @{row.original.brandName}                           
+                      </div>
+                    )}}/> 
+                )}}/>
       </div>
     )
   }
