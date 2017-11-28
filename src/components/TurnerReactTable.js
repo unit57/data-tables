@@ -43,81 +43,99 @@ export default class TurnerReactTable extends Component {
   }
 
 //checkboxHandelers
-  handleCheckCompany(e){
-    // is id set to company name
-    let selectedCompany = e.target.id;
-    
-    // find the company that matches the selected company
-    let company = this.props.data.find((company) => {
-        return company.name === selectedCompany;
-    });
-    // get all brand names from  selected company
-    let brandNames = company.brands.map((brand) => {
-          return brand.brandName  
-    });
-    // if checkbox is checked add brandNames to existing state of isCheckedBrandName
-    if (e.target.checked){ 
-      // make new array from existing state and new brand names
-      let newBrandArray = [...this.state.isCheckedBrandName, ...brandNames];
+  
+  // Select All
+handleCheckCompany(e){
+  // is id set to company name
+  let selectedCompany = e.target.id;
 
-      this.setState({
-        // set new state to existing state plus new brands with no duplicates
-        isCheckedBrandName: Array.from(new Set(newBrandArray))
-      }, ()=>{console.log('state selected names',this.state.isCheckedBrandName)})
-    } else {
-      // if checkbox is unchecked remove from isCheckedBrandName all the brands associated with selected company
-      let removeBrands = this.state.isCheckedBrandName.filter((brand) => {
-         // why does this work?
-         return brandNames.includes(brand) === false;
-      });
-      this.setState({
-        isCheckedBrandName: removeBrands,
-      },()=>{console.log('state selected names removed company',this.state.isCheckedBrandName)});
-    }
+  // find the company that matches the selected company
+  let company = this.props.data.find((company) => {
+    return company.name === selectedCompany;
+  });
+  // get all brand names from  selected company
+  let brandNames = company.brands.map((brand) => {
+    return brand.brandName  
+  });
+  // if checkbox is checked add brandNames to existing state of isCheckedBrandName
+  if (e.target.checked){ 
+  // make new array from existing state and new brand names
+    let newBrandArray = [...this.state.isCheckedBrandName, ...brandNames];
 
-  };
-
-
-
-  handleCheckBrand(e) {
-    // id is set to brand name
-    let brand = e.target.id;
-    this.filterBrands(brand);
-  }
-
-
-  filterBrands(brandName){
-    // if the checked brand state does not include the selected brand, add it.
-    if(this.state.isCheckedBrandName.includes(brandName) === false){
-        this.setState({
-          isCheckedBrandName: [...this.state.isCheckedBrandName, brandName]
-        },()=>{console.log('checked Brands',this.state.isCheckedBrandName)});
-        
-    } else {
-      // if the checked brand state does not include the selected brand, remove it.
-      let filterExistingBrandName = this.state.isCheckedBrandName.filter((b)=>{
-        return b !== brandName;
-      })
-        this.setState({
-          isCheckedBrandName: filterExistingBrandName
-        },()=>{console.log('checked Brands', this.state.isCheckedBrandName)});  
-    } 
-  }
-
- handleRowExpanded(newExpanded, index, event) {
-    
-    let expandedTables = Object.assign({}, this.state.expanded);
-    
-    if(expandedTables[index] === false || expandedTables[index] === undefined ){
-      expandedTables[index] = true;
-    } else {
-      expandedTables[index] = false;
-    }
     this.setState({
-    // we override newExpanded, keeping only current selected row expanded
-        expanded: expandedTables
-    });
+    // set new state to existing state plus new brands with no duplicates
+    isCheckedBrandName: Array.from(new Set(newBrandArray))
+    }, ()=>{console.log('state selected names',this.state.isCheckedBrandName)})
+  } else {
+  // if checkbox is unchecked remove from isCheckedBrandName all the brands associated with selected company
+  let removeBrands = this.state.isCheckedBrandName.filter((brand) => {
+  // why does this work?
+    return brandNames.includes(brand) === false;
+  });
+  this.setState({
+    isCheckedBrandName: removeBrands,
+    },()=>{console.log('state selected names removed company',this.state.isCheckedBrandName)});
   }
+};
+
+
+  // Select One *** should this be based on if checked or not?
+handleCheckBrand(e) {
+  // id is set to brand name
+  let brandName = e.target.id;
+  // if the checked brand state does not include the selected brand, add it.
+  if (e.target.checked === true && this.state.isCheckedBrandName.includes(brandName) === false) {
+    this.setState({
+    isCheckedBrandName: [...this.state.isCheckedBrandName, brandName]
+  },() => {console.log('checked Brands',this.state.isCheckedBrandName)});
+  } else if (e.target.checked === false) { 
+  // if the checked brand state does not include the selected brand, remove it.
+  let filterExistingBrandName = this.state.isCheckedBrandName.filter((b) => {
+    return b !== brandName;
+  })
+  this.setState({
+    isCheckedBrandName: filterExistingBrandName
+    },()=>{console.log('checked Brands', this.state.isCheckedBrandName)});  
+  }
+}
+//
+isCheckBoxChecked(props){
+  return true;
+}
+
+
+  // filterBrands(brandName){
+  //   // if the checked brand state does not include the selected brand, add it.
+  //   if(this.state.isCheckedBrandName.includes(brandName) === false){
+  //       this.setState({
+  //         isCheckedBrandName: [...this.state.isCheckedBrandName, brandName]
+  //       },()=>{console.log('checked Brands',this.state.isCheckedBrandName)});
+        
+  //   } else {
+  //     // if the checked brand state does not include the selected brand, remove it.
+  //     let filterExistingBrandName = this.state.isCheckedBrandName.filter((b)=>{
+  //       return b !== brandName;
+  //     })
+  //       this.setState({
+  //         isCheckedBrandName: filterExistingBrandName
+  //       },()=>{console.log('checked Brands', this.state.isCheckedBrandName)});  
+  //   } 
+  // }
+
+handleRowExpanded(newExpanded, index, event) {
+  // make a new object of existing values of expanded state
+  let expandedTables = Object.assign({}, this.state.expanded);
+  // if expandedTable is not expanded, expand it.
+  if (expandedTables[index] === false || expandedTables[index] === undefined ) {
+    expandedTables[index] = true;
+  } else {
+  // if expanded tables are expanded collapse them   
+    expandedTables[index] = false;
+  }
+  this.setState({
+    expanded: expandedTables
+  });
+}
 
 
  render() {
@@ -204,14 +222,20 @@ if(this.state.searchCategory){
   }, {
     Header: 'Name',
     accessor: 'name', // String-based value accessors!
-    Cell: props => 
+    Cell: (props) => {
+      props.checked = false
+      //console.log('props', props)
+    return(
     <span className='number'> 
       <input 
         type="checkbox" 
         id={props.value} 
         value={props.value}
-        onChange={(e)=>{this.handleCheckCompany(e)}}/>
-        <label htmlFor={props.value}> {props.value} </label></span>,
+        
+        onChange={(e, props)=>{this.handleCheckCompany(e, props)}}/>
+        <label htmlFor={props.value}> {props.value} </label></span>
+      )},
+
     width: 500,
   }, {
     Header: 'Type',
@@ -248,13 +272,26 @@ if(this.state.searchCategory){
     width: 50
   }, {
     accessor: 'brandName', // String-based value accessors!
-    Cell: props => <span style={{ paddingLeft: "20px" }} className='number'>
-      <input 
-        type="checkbox" 
-        id={props.value} 
-        value={props.value}
-        onChange={(e)=>{this.handleCheckBrand(e)}}/>
-      <label htmlFor={props.value}> {props.value} </label></span>,
+    Cell: (props) => {
+      
+      let checked = false;
+      
+      if (this.state.isCheckedBrandName.includes(props.original.brandName)){
+        checked = true;
+      } else {
+        checked = false
+      };
+
+      return (
+        <span style={{ paddingLeft: "20px" }} className='number'>
+        <input 
+          type="checkbox" 
+          id={props.value} 
+          value={props.value}
+          checked={checked}
+          onChange={(e)=>{this.handleCheckBrand(e)}}/>
+        <label htmlFor={props.value}> {props.value} </label></span>
+        )},
     width: 500,
     sortable: false
   }, {
