@@ -19,29 +19,33 @@ export default class TurnerReactTable extends Component {
     this.handleCheckBrand = this.handleCheckBrand.bind(this);
   }
 
-
-
 // Search Handelers 
   handleBrandSearch(e){
-    this.setState({
-      searchLocation: '',
-      searchBrand: e.target.value,
-      searchCategory: '',
-      expanded: expandedGroups
-    });
+    // do we want to clear country if we clear search???
+/*    if (e.target.value === ''){
+      this.setState({
+        searchBrand: e.target.value,
+        expanded: expandedGroups,
+        searchLocation:'',
+      });
+
+    } else {*/
+      this.setState({
+        searchBrand: e.target.value,
+        expanded: expandedGroups
+      });
+    /*}*/
+
+
   }
   handleLocationSearch(e){
     this.setState({
       searchLocation: e.target.value,
-      searchBrand: '',
-      searchCategory: '',
       expanded: expandedGroups
     }, ()=>{console.log('this.state.searchLocation', this.state.searchLocation, expandedGroups)});
   }
   handleCategorySearch(e){
     this.setState({
-      searchLocation: '',
-      searchBrand: '',
       searchCategory: e.target.value
     });
   }
@@ -159,7 +163,7 @@ render() {
   if(this.state.searchBrand){
     // get company names that match searchString with name and/or brandNames
    
-    data = this.props.data.filter((company, index) => {
+    data = data.filter((company, index) => {
       // check if search is in company name
       let companyMatches = company.name.toLowerCase().includes(this.state.searchBrand.toLowerCase());
       // check if search is in brands of a particular company
@@ -185,15 +189,16 @@ render() {
     expandedGroups = data.map((element, index)=>{
       return expandedGroups[index] = true;
     }); 
-  } else if (this.state.searchBrand === '' && this.state.searchLocation === ''){
+  } else if (this.state.searchBrand === ''){
       expandedGroups = data.map((element, index)=>{
         return expandedGroups[index] = false;
       });
+      data = [].concat(this.props.data)
   }
    
   // Search by Location
   if(this.state.searchLocation){
-    data = this.props.data.filter((company) => {
+    data = data.filter((company) => {
       let companyMatches = company.location.toLowerCase().includes(this.state.searchLocation.toLowerCase());
       let filteredLocation = company.brands.filter((brand) => {
         return brand.brandName.toLowerCase().includes(this.state.searchLocation.toLowerCase())
@@ -214,8 +219,12 @@ render() {
     expandedGroups = data.map((element, index)=>{
       return expandedGroups[index] = true;
     }); 
-  };
-
+  }else if (this.state.searchBrand === '' && this.state.searchLocation === ''){
+      expandedGroups = data.map((element, index)=>{
+        return expandedGroups[index] = false;
+      });
+      data = [].concat(this.props.data);
+}
   // Search by Category ***** FIND OUT WHAT WE ARE REALLY FILTERING HERE ********
   if(this.state.searchCategory){
     data = this.props.data.filter((company) => {
@@ -392,8 +401,8 @@ render() {
           expanded={this.state.expanded}
           onExpandedChange={(newExpanded, index, event) => {this.handleRowExpanded(newExpanded, index, event)}}
             SubComponent={(row) => {
+              console.log('row brands', row.original.brands)
               return (
-
               <ReactTable
                 showPaginationBottom={false}
                 defaultPageSize={row.original.brands.length}
