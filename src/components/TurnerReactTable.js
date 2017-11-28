@@ -21,22 +21,10 @@ export default class TurnerReactTable extends Component {
 
 // Search Handelers 
   handleBrandSearch(e){
-    // do we want to clear country if we clear search???
-/*    if (e.target.value === ''){
-      this.setState({
-        searchBrand: e.target.value,
-        expanded: expandedGroups,
-        searchLocation:'',
-      });
-
-    } else {*/
-      this.setState({
-        searchBrand: e.target.value,
-        expanded: expandedGroups
-      });
-    /*}*/
-
-
+    this.setState({
+      searchBrand: e.target.value,
+      expanded: expandedGroups
+    });
   }
   handleLocationSearch(e){
     this.setState({
@@ -46,6 +34,8 @@ export default class TurnerReactTable extends Component {
   }
   handleCategorySearch(e){
     this.setState({
+      searchLocation: '',
+      searchBrand: '',
       searchCategory: e.target.value
     });
   }
@@ -189,7 +179,7 @@ render() {
     expandedGroups = data.map((element, index)=>{
       return expandedGroups[index] = true;
     }); 
-  } else if (this.state.searchBrand === ''){
+  } else if (this.state.searchBrand === '' && this.state.searchLocation === ''){
       expandedGroups = data.map((element, index)=>{
         return expandedGroups[index] = false;
       });
