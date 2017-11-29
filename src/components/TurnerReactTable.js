@@ -41,18 +41,14 @@ export default class TurnerReactTable extends Component {
   }
 
 //checkboxHandelers
-
-  
 // Select All
-handleCheckCompany(e){
+handleCheckCompany(e, props){
   // is id set to company name
   let selectedCompany = e.target.id
-
+  console.log('props', props)
 
   // find the company that matches the selected company
-  let company = this.props.data.find((company) => {
-    return company.name === selectedCompany;
-  });
+  let company = props.original
   // get all brand names from  selected company
   let brandNames = company.brands.map((brand) => {
     return brand.brandName  
@@ -79,7 +75,7 @@ handleCheckCompany(e){
 };
 
 
-  // Select One *** should this be based on if checked or not?
+// Select One *** should this be based on if checked or not?
 handleCheckBrand(e) {
   // id is set to brand name
   let brandName = e.target.id;
@@ -100,30 +96,11 @@ handleCheckBrand(e) {
 }
 
 
-
-  // filterBrands(brandName){
-  //   // if the checked brand state does not include the selected brand, add it.
-  //   if(this.state.isCheckedBrandName.includes(brandName) === false){
-  //       this.setState({
-  //         isCheckedBrandName: [...this.state.isCheckedBrandName, brandName]
-  //       },()=>{console.log('checked Brands',this.state.isCheckedBrandName)});
-        
-  //   } else {
-  //     // if the checked brand state does not include the selected brand, remove it.
-  //     let filterExistingBrandName = this.state.isCheckedBrandName.filter((b)=>{
-  //       return b !== brandName;
-  //     })
-  //       this.setState({
-  //         isCheckedBrandName: filterExistingBrandName
-  //       },()=>{console.log('checked Brands', this.state.isCheckedBrandName)});  
-  //   } 
-  // }
-
 // When all brands are selected check company, when company is selected but a brand is delecected, deselect company
 areBrandsChecked(props){
   let brandNames = props.original.brands.map((brand) => {return brand.brandName;})
-   return brandNames.every((element)=>{
-     return this.state.isCheckedBrandName.includes(element)
+   return brandNames.every((brandName)=>{
+     return this.state.isCheckedBrandName.includes(brandName)
    });
 }
 // fires when expaner arrow is clicked
@@ -141,7 +118,6 @@ handleRowExpanded(newExpanded, index, event) {
     expanded: expandedTables
   });
 }
-
 
 
 
@@ -234,8 +210,6 @@ render() {
       return companyClone;
     });
   };
-
-
    
 // Company Columns
   const companyColumns = [{
@@ -254,7 +228,7 @@ render() {
         id={props.value} 
         value={props.value}
         checked={checked}
-        onChange={(e)=>{this.handleCheckCompany(e)}}/>
+        onChange={(e)=>{this.handleCheckCompany(e, props)}}/>
         <label htmlFor={props.value}> {props.value} </label>
       </span>
       )},
